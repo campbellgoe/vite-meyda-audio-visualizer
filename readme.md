@@ -14,4 +14,4 @@ Find the "scripts" in package.json - to run them use:
 
 `npm run dev` - to run the project locally in dev mode
 
-`npm run build` - to build the project ready for production
+`npm run build` - to build the project ready for production - this will export into the `dist` folder of production ready files that can be served statically.

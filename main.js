@@ -6,28 +6,50 @@ const audioPlayer = document.getElementById('audioPlayer');
 const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 
+
+let micRecorder
 let recordingMic = false
-recordMicBtn.addEventListener('click', function () {
-  async function start() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    recordingMic = !!stream
-    // console.log('You let me use your mic!', stream)
-    const audioCtx = new AudioContext();
-    const audioSource = audioCtx.createMediaStreamSource(stream);
-    // // console.log('audioSource', audioSource)
-    // WARN: DO NOT connect source (mic) to audio destination (speakers) because it can lead to feedback
-    const analyzer = Meyda.createMeydaAnalyzer({
-      "audioContext": audioCtx,
-      "source": audioSource,
-      "bufferSize": 512,
-      "featureExtractors": ['rms'],
-      "callback": features => drawMicAudioData(features)
-
-    });
-    analyzer.start();
-
+function updateRecordMicBtnText(recordingMic) {
+  if (recordingMic) {
+    recordMicBtn.textContent = 'Stop microphone'
+  } else {
+    recordMicBtn.textContent = 'Record microphone'
   }
-  start()
+}
+async function startMicAndDrawAudio() {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+  recordingMic = !!stream
+  micRecorder = new MediaRecorder(stream);
+  // console.log('You let me use your mic!', stream)
+  const audioCtx = new AudioContext();
+  const audioSource = audioCtx.createMediaStreamSource(stream);
+  // // console.log('audioSource', audioSource)
+  // WARN: DO NOT connect source (mic) to audio destination (speakers) because it can lead to feedback
+  const analyzer = Meyda.createMeydaAnalyzer({
+    "audioContext": audioCtx,
+    "source": audioSource,
+    "bufferSize": 512,
+    "featureExtractors": ['rms'],
+    "callback": features => drawMicAudioData(features)
+
+  });
+  analyzer.start();
+}
+function endMic() {
+  micRecorder.stream.getAudioTracks().forEach(function (track) { track.stop(); });
+  recordingMic = false
+}
+recordMicBtn.addEventListener('click', function () {
+  async function toggle() {
+    if (!recordingMic) {
+      await startMicAndDrawAudio()
+      updateRecordMicBtnText(true)
+    } else {
+      endMic() 
+      updateRecordMicBtnText(false)
+    }
+  }
+  toggle()
 })
 
 fileInput.addEventListener('change', function (e) {
@@ -39,7 +61,7 @@ fileInput.addEventListener('change', function (e) {
 audioPlayer.onplay = () => {
   const audioCtx = new AudioContext();
   const source = audioCtx.createMediaElementSource(audioPlayer);
-  
+
   // connect audio source to speakers
   source.connect(audioCtx.destination)
   const analyzer = Meyda.createMeydaAnalyzer({
@@ -52,22 +74,22 @@ audioPlayer.onplay = () => {
   analyzer.start();
 };
 
-function drawAudio({rms}) {
+function drawAudio({ rms }) {
   const w = canvas.width
   const h = canvas.height
   ctx.fillStyle = 'rgba(0,0,0,0.1)'
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = '#558822'
   ctx.beginPath()
-  ctx.moveTo(0, h/2)
-  ctx.lineTo(w, h/2);
+  ctx.moveTo(0, h / 2)
+  ctx.lineTo(w, h / 2);
   ctx.lineWidth = rms;
   ctx.closePath();
   ctx.stroke();
   // Visualization logic here, using 'rms' or other features
 }
 
-function drawMicAudioData(features){
+function drawMicAudioData(features) {
   //console.log(features)
   drawAudio({ rms: features.rms })
 }
