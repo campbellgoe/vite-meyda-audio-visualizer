@@ -19,6 +19,9 @@
       height: 300px;
       margin-top: 20px;
     }
+    .button-group {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -26,6 +29,10 @@
     <button id="record-mic-btn">Record Microphone</button>
     <input type="file" id="audioFile" accept="audio/*"/>
     <audio id="audioPlayer" controls></audio>
+    <div class="button-group">
+      <button id="mode-bar">Bar Mode</button>
+      <button id="mode-wave">Wave Mode</button>
+    </div>
     <canvas id="visualizer"></canvas>
   </div>
   <script type="module" src="/main.js"></script>
