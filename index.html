@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vite Audio Visualizer</title>
+  <title>Simple Audio Visualiser</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,6 +25,7 @@
   </style>
 </head>
 <body>
+  <h1>Simple audio visualiser</h1>
   <div id="app">
     <button id="record-mic-btn">Record Microphone</button>
     <input type="file" id="audioFile" accept="audio/*"/>
@@ -34,6 +35,52 @@
       <button id="mode-wave">Wave Mode</button>
     </div>
     <canvas id="visualizer"></canvas>
+  </div>
+  <div>
+    <h2>How it works</h2>
+    <section>
+      <h4>Web Audio, Meyda, 2d Canvas</h4>
+      <code><pre>
+// on play the audio that has been loaded
+audioPlayer.onplay = () => {
+  // get a new AudioContext
+  const audioCtx = new AudioContext();
+  // get a source of the audio
+  const source = audioCtx.createMediaElementSource(audioPlayer);
+  // output the audio to the speakers
+  source.connect(audioCtx.destination);
+
+  // analyse the audio features with Meyda
+  const analyzer = Meyda.createMeydaAnalyzer({
+    audioContext: audioCtx,
+    source: source,
+    bufferSize: 512,
+    // in our case, <a rel="noopener noreferrer" target="_blank" href="https://meyda.js.org/audio-features.html#:~:text=Time%2Ddomain%20features-,RMS,-rms">rms</a>, the root mean square of the waveform
+    // and <a rel="noopener noreferrer" target="_blank" href="https://meyda.js.org/audio-features.html#:~:text=Spectral%20Features-,AmplitudeSpectrum,-amplitudeSpectrum">amplitudeSpectrum</a>
+    featureExtractors: ['rms', 'amplitudeSpectrum'],
+    callback: drawAudio
+  });
+
+  analyzer.start();
+};</pre></code>
+  <p>In the above code the audio stream comes from the user microphone.</p>
+  <p>It extracts some audio features using Meyda, and draws them to a 2d canvas.</p>
+  <code><pre>
+// the bar mode drawing is fairly simple:
+function drawBar(rms) {
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const height = rms * canvas.height/2;
+  const y = canvas.height / 2 - height / 2;
+
+  ctx.fillStyle = '#558822';
+  ctx.fillRect(0, y, canvas.width, height);
+}
+  </pre></code> 
+  <p>Here the bar mode drawing code is shown. It only takes into account rms.</p>
+  <p>Thanks for playing with this simple audio visualiser and learning a little about it.</p>
+</section>
   </div>
   <footer>Made by George O. E. Campbell <br/><a href="https://georgecampbell.co.uk">Visit portfolio</a></footer>
   <script type="module" src="/main.js"></script>
