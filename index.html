@@ -1,18 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app">
-      <button id="record-mic-btn">Record microphone</button>
-      <input type="file" id="audioFile" accept="audio/*"/>
-      <audio id="audioPlayer" controls></audio>
-      <canvas id="visualizer"></canvas>
-    </div>
-    <script type="module" src="/main.js"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite Audio Visualizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    #visualizer {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 300px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <button id="record-mic-btn">Record Microphone</button>
+    <input type="file" id="audioFile" accept="audio/*"/>
+    <audio id="audioPlayer" controls></audio>
+    <canvas id="visualizer"></canvas>
+  </div>
+  <script type="module" src="/main.js"></script>
+</body>
 </html>
