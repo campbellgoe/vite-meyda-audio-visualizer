@@ -7,7 +7,9 @@ const canvas = document.getElementById('visualizer');
 const ctx = canvas.getContext('2d');
 const modeBarBtn = document.getElementById('mode-bar');
 const modeWaveBtn = document.getElementById('mode-wave');
-
+const modeBrightnessBtn = document.getElementById('mode-brightness');
+const modeChromaBtn = document.getElementById('mode-chroma');
+const modeLoudnessBtn = document.getElementById('mode-loudness');
 canvas.width = window.innerWidth * 0.8;
 canvas.height = 300;
 
@@ -30,7 +32,7 @@ async function startMicAndDrawAudio() {
     audioContext: audioCtx,
     source: audioSource,
     bufferSize: 512,
-    featureExtractors: ['rms', 'amplitudeSpectrum'],
+    featureExtractors: ['rms', 'amplitudeSpectrum', 'spectralCentroid', 'chroma', 'loudness', 'spectralFlux'],
     callback: drawAudio
   });
 
@@ -67,7 +69,7 @@ audioPlayer.onplay = () => {
     audioContext: audioCtx,
     source: source,
     bufferSize: 512,
-    featureExtractors: ['rms', 'amplitudeSpectrum'],
+    featureExtractors: ['rms', 'amplitudeSpectrum', 'spectralCentroid', 'chroma', 'loudness', 'spectralFlux'],
     callback: drawAudio
   });
 
@@ -100,6 +102,47 @@ function drawWave({rms, amplitudeSpectrum}) {
   ctx.lineWidth = 2; // Width of the wave line
   ctx.stroke();
 }
+function drawSpectralCentroid({ spectralCentroid, amplitudeSpectrum }) {
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height / 2);
+  for (let i = 0; i < canvas.width; i++) {
+    const index = Math.floor((i / canvas.width) * amplitudeSpectrum.length);
+    const amp = amplitudeSpectrum[index];
+    const y = canvas.height / 2 + (amp * spectralCentroid);
+    ctx.lineTo(i, y);
+  }
+
+  ctx.strokeStyle = 'orange';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawChroma({ chroma }) {
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+console.log(chroma)
+  const barWidth = canvas.width / chroma.length;
+  chroma.forEach((value, i) => {
+    const height = value * canvas.height;
+    ctx.fillStyle = `hsl(${(i / chroma.length) * 360}, 100%, 50%)`;
+    ctx.fillRect(i * barWidth, canvas.height - height, barWidth, height);
+  });
+}
+
+function drawLoudness({ loudness }) {
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const barWidth = canvas.width / loudness.specific.length;
+  loudness.specific.forEach((value, i) => {
+    const height = value * canvas.height;
+    ctx.fillStyle = `rgb(${255 - (255 * i / loudness.specific.length)}, 100, 100)`;
+    ctx.fillRect(i * barWidth, canvas.height - height, barWidth, height);
+  });
+}
 
 function drawBar(rms) {
   ctx.fillStyle = 'rgba(0,0,0,0.1)';
@@ -112,20 +155,36 @@ function drawBar(rms) {
   ctx.fillRect(0, y, canvas.width, height);
 }
 
-function drawAudio({ rms, amplitudeSpectrum }) {
+function drawAudio({ rms, amplitudeSpectrum, spectralCentroid, chroma, loudness }) {
   if (visualizationMode === 'bar') {
   drawBar(rms);
   } else if (visualizationMode === 'wave') {
-  drawWave({rms, amplitudeSpectrum});
-  }
-  }
+    drawWave({rms, amplitudeSpectrum});
+    } else if (visualizationMode === 'brightness') {
+      drawSpectralCentroid({ spectralCentroid, amplitudeSpectrum })
+      }else if (visualizationMode === 'chroma') {
+        drawChroma({ chroma })
+        }else if (visualizationMode === 'loudness') {
+          drawLoudness({ loudness })
+          }
+
+}
   
   modeBarBtn.addEventListener('click', () => {
   visualizationMode = 'bar';
   });
   
   modeWaveBtn.addEventListener('click', () => {
-  visualizationMode = 'wave';
+    visualizationMode = 'wave';
+  });
+  modeBrightnessBtn.addEventListener('click', () => {
+    visualizationMode = 'brightness';
+  });
+  modeChromaBtn.addEventListener('click', () => {
+    visualizationMode = 'chroma';
+  });
+  modeLoudnessBtn.addEventListener('click', () => {
+    visualizationMode = 'loudness';
   });
   
   window.onresize = () => {
