@@ -78,7 +78,6 @@ audioPlayer.onplay = () => {
 
 
 function drawWave({rms, amplitudeSpectrum}) {
-  console.log(rms, amplitudeSpectrum)
   
   ctx.fillStyle = 'rgba(0,0,0,0.1)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -123,7 +122,6 @@ function drawSpectralCentroid({ spectralCentroid, amplitudeSpectrum }) {
 function drawChroma({ chroma }) {
   ctx.fillStyle = 'rgba(0,0,0,0.1)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-console.log(chroma)
   const barWidth = canvas.width / chroma.length;
   chroma.forEach((value, i) => {
     const height = value * canvas.height;
